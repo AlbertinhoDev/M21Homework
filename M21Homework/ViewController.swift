@@ -3,20 +3,23 @@ import UIKit
 class Fish: UIViewController {
 
     let fishSize = 150.0
-
-    lazy var fishImageView: UIImageView = {
-        let fish = UIImageView(image: UIImage(named: "Fish"))
-        fish.contentMode = .scaleAspectFit
-        let xRandom = Int.random(in: 0...Int(view.bounds.width) - Int(fishSize))
-        let yRandom = Int.random(in: 0...Int(view.bounds.height) - Int(fishSize))
-        fish.frame = CGRect(x: CGFloat(xRandom), y: CGFloat(yRandom), width: fishSize, height: fishSize)
-        fish.translatesAutoresizingMaskIntoConstraints = true
-        fish.isHidden = true
-        return fish
-    }()
+    
+    func createFish(name: String) -> UIImageView{
+        lazy var fishImageView: UIImageView = {
+            let fish = UIImageView(image: UIImage(named: name))
+            fish.contentMode = .scaleAspectFit
+            let xRandom = Int.random(in: 0...Int(view.bounds.width) - Int(fishSize))
+            let yRandom = Int.random(in: 0...Int(view.bounds.height) - Int(fishSize))
+            fish.frame = CGRect(x: CGFloat(xRandom), y: CGFloat(yRandom), width: fishSize, height: fishSize)
+            fish.translatesAutoresizingMaskIntoConstraints = true
+            fish.isHidden = true
+            return fish
+        }()
+        return fishImageView
+    }
 
     @objc func animateBegin(fish: UIImageView) {
-        fish.isHidden = false
+        
         let xPosition = setMove(fish: fish).xRandom
         let yPosition = setMove(fish: fish).yRandom
         let timeShift = setMove(fish: fish).timeShift
@@ -64,29 +67,25 @@ class ViewController: UIViewController {
         back.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height)
         return back
     }()
+    
+    lazy var alert: UIAlertController = {
+        let alert = UIAlertController(
+            title: "WIN", message: "Congratulations!", preferredStyle: .alert
+        )
+        let action = UIAlertAction(title: "Ok", style: .default) { _ in //Исправление ошибки при повторном появлении Alert
+            self.alert.dismiss(animated: false, completion: nil)
+        }
+        alert.addAction(action)
+        return alert
+    }()
 
     var stopGame = true
 
-    let fish = Fish().fishImageView
-    let fishTwo = Fish().fishImageView
-    let fishThree = Fish().fishImageView
-    let fishFour = Fish().fishImageView
-    let fishFive = Fish().fishImageView
-
-    @objc func animation() {
-        fish.isHidden = false
-        fishTwo.isHidden = false
-        fishThree.isHidden = false
-        fishFour.isHidden = false
-        fishFive.isHidden = false
-        playButton.isHidden = true
-
-        Fish().animateBegin(fish: fish)
-        Fish().animateBegin(fish: fishTwo)
-        Fish().animateBegin(fish: fishThree)
-        Fish().animateBegin(fish: fishFour)
-        Fish().animateBegin(fish: fishFive)
-    }
+    let fish = Fish().createFish(name: "FishOne")
+    let fishTwo = Fish().createFish(name: "FishTwo")
+    let fishThree = Fish().createFish(name: "FishThree")
+    let fishFour = Fish().createFish(name: "FishFour")
+    let fishFive = Fish().createFish(name: "FishFive")
 
     lazy var playButton: UIButton = {
         let button = UIButton()
@@ -101,24 +100,10 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         playButton.addTarget(self, action: #selector(animation), for: .touchUpInside)
-
-
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped(_ :)))
-        fish.addGestureRecognizer(tapGesture)
-        fish.isUserInteractionEnabled = true
-
-        fishTwo.addGestureRecognizer(tapGesture)
-        fishTwo.isUserInteractionEnabled = true
-
-        fishThree.addGestureRecognizer(tapGesture)
-        fishThree.isUserInteractionEnabled = true
-
-        fishFour.addGestureRecognizer(tapGesture)
-        fishFour.isUserInteractionEnabled = true
-
-        fishFive.addGestureRecognizer(tapGesture)
-        fishFive.isUserInteractionEnabled = true
-
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped(_:)))
+        view.addGestureRecognizer(tapGesture)
+        view.isUserInteractionEnabled = true
+        
         view.addSubview(fish)
         view.addSubview(fishTwo)
         view.addSubview(fishThree)
@@ -134,91 +119,48 @@ class ViewController: UIViewController {
         playButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -100).isActive = true
         playButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
     }
+    
+    @objc func animation() {
+        stopGame = false
+        fish.isHidden = false
+        fishTwo.isHidden = false
+        fishThree.isHidden = false
+        fishFour.isHidden = false
+        fishFive.isHidden = false
+        playButton.isHidden = true
 
-//    @objc func animateBegin() {
-//        if stopGame {
-//            playButton.isHidden = true
-//            if self.fish.isHidden {
-//                self.fish.isHidden = false
-//            }
-//            let xPosition = setMove().xRandom
-//            let yPosition = setMove().yRandom
-//            let timeShift = setMove().timeShift
-//            UIView.animate(withDuration: timeShift, delay: 0, options: [.curveLinear, .allowUserInteraction], animations: {
-//                self.fish.center = CGPoint(x: CGFloat(xPosition), y: CGFloat(yPosition))
-//            }, completion: { finished in
-//                self.animateContinue()
-//            })
-//        }else{
-//            stopGame = true
-//            return
-//        }
-//
-//    }
-//    private func animateContinue() {
-//        if stopGame {
-//            let xPosition = setMove().xRandom
-//            let yPosition = setMove().yRandom
-//            let timeShift = setMove().timeShift
-//            UIView.animate(withDuration: timeShift, delay: 0, options: [.curveLinear, .allowUserInteraction], animations: {
-//                self.fish.center = CGPoint(x: CGFloat(xPosition), y: CGFloat(yPosition))
-//            }, completion: { finished in
-//                self.animateBegin()
-//            })
-//        }else{
-//            stopGame = true
-//            return
-//        }
-//    }
-
-//    private func setMove() -> (xRandom: Int, yRandom: Int, timeShift: Double) {
-//        let xCurrentPosition = Int(self.fish.frame.origin.x)
-//        let yCurrentPosition = Int(self.fish.frame.origin.y)
-//        let xMaxView = view.bounds.width - 150
-//        let yMaxView = view.bounds.height - 150
-//
-//        let xRandom = Int.random(in: 0...Int(xMaxView))
-//        let yRandom = Int.random(in: 0...Int(yMaxView))
-//
-//
-//        let sqrtX = xCurrentPosition - xRandom
-//        let sqrtY = yCurrentPosition - yRandom
-//        let currentPositionToFinalPosition = sqrt(Double(sqrtX * sqrtX + sqrtY * sqrtY))
-//        let speed = 100.0
-//        let timeShift = currentPositionToFinalPosition / speed
-//        return (xRandom, yRandom, timeShift)
-//    }
-
-    @objc func imageTapped(_ sender: UITapGestureRecognizer) {
-        switch sender.view {
-        case fish:
-            fish.isHidden = true
-            fish.layer.removeAllAnimations()
-            print("Рыбка 1")
-        case fishTwo:
-            fishTwo.isHidden = true
-            fishTwo.layer.removeAllAnimations()
-            print("Рыбка 2")
-        case fishThree:
-            fishThree.isHidden = true
-            fishThree.layer.removeAllAnimations()
-            print("Рыбка 3")
-        case fishFour:
-            fishFour.isHidden = true
-            fishFour.layer.removeAllAnimations()
-            print("Рыбка 4")
-        case fishFive:
-            fishFive.isHidden = true
-            fishFive.layer.removeAllAnimations()
-            print("Рыбка 5")
-        default:
-            print("")
-        }
-
-
-//        self.playButton.isHidden = false
-//        self.stopGame = false
+        Fish().animateBegin(fish: fish)
+        Fish().animateBegin(fish: fishTwo)
+        Fish().animateBegin(fish: fishThree)
+        Fish().animateBegin(fish: fishFour)
+        Fish().animateBegin(fish: fishFive)
     }
-
+    
+    @objc func imageTapped(_ gesture: UITapGestureRecognizer) {
+        let fishes = [fish, fishTwo, fishThree, fishFour, fishFive]
+        
+        let touchLocation = gesture.location(in: self.view)
+        
+        for i in fishes {
+            if let presentationLayer = i.layer.presentation() {
+                let hitFrame = presentationLayer.frame
+                if hitFrame.contains(touchLocation) {
+                    i.isHidden = true
+                    i.layer.removeAllAnimations()
+                    var value = 0
+                    for i in fishes {
+                        if i.isHidden == true {
+                            value += 1
+                            if value == 5 {
+                                self.present(alert, animated: true)
+                                playButton.isHidden = false
+                                
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
